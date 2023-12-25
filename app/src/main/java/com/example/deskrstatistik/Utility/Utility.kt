@@ -2,7 +2,6 @@ package com.example.deskrstatistik.Utility
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
@@ -15,8 +14,8 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -56,13 +55,29 @@ fun getSum(anyList: List<Float>): String {
     return roundToThreeDecimalPlaces(sum)
 }
 
+fun List<Float>.median(): Float? {
+    if (isEmpty()) return null
+
+    return if (size % 2 == 1) {
+        this[(size - 1) / 2]
+    } else {
+        (this[size / 2 - 1] + this[size / 2]) / 2.0f
+    }
+}
+
 //annotated strings
+
 @Composable
-fun FormulaBeginn(x: String, numerator: String, denominator: String) {
+fun FormulaBeginn(x: String) {
     Text(buildAnnotatedString {
         withStyle(style = SpanStyle(fontSize = 20.sp)) {
             append(x)
         }
+    }, color = Color.LightGray)
+}
+@Composable
+fun getFraction(numerator: String, denominator: String) {
+    Text(buildAnnotatedString {
         withStyle(style = SpanStyle(fontSize = 12.sp, baselineShift = BaselineShift.Superscript)) {
             append(numerator)
         }
@@ -82,7 +97,7 @@ fun xWithLowerChar(x: String, i: String) {
         withStyle(style = SpanStyle(fontSize = 20.sp)) {
             append(" $x")
         }
-        withStyle(style = SpanStyle(fontSize = 12.sp, baselineShift = BaselineShift.Subscript)) {
+        withStyle(style = SpanStyle(fontSize = 15.sp, baselineShift = BaselineShift.Subscript)) {
             append("$i")
         }
     }, color = Color.LightGray)
@@ -124,5 +139,33 @@ fun SummationSymbol() {
             )
         }
     }
+}
+
+@Composable
+fun fractionBuilder(x: String, y: String, fontSizeX: Int = 15, fontSizeY: Int = 15, lineheight: Int =12) {
+    Text(
+        buildAnnotatedString {
+            withStyle(style = ParagraphStyle(lineHeight = lineheight.sp)) {
+                withStyle(
+                    style = SpanStyle(
+                        fontSize = fontSizeX.sp,
+                        color = Color.LightGray.copy(alpha = .75f),
+                        fontFamily = FontFamily.Serif,
+                        textDecoration = TextDecoration.Underline
+                    )
+                ) {
+                    append(x + "\n")
+                }
+                withStyle(
+                    style = SpanStyle(
+                        fontSize = fontSizeY.sp, color = Color.LightGray.copy(alpha = .6f),
+                        fontFamily = FontFamily.Serif
+                    )
+                ) {
+                    append(y)
+                }
+            }
+        }
+    )
 }
 
