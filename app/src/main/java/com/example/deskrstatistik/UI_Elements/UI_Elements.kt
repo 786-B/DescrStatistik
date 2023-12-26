@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -58,11 +61,21 @@ fun NumberField(initialValue: String, onNumbersChange: (String) -> Unit) {
 }
 
 @Composable
-fun getIcon(enabled: Boolean = false, onClick: () -> Unit) {
+fun getClearIcon(enabled: Boolean = false, onClick: () -> Unit) {
     Icon(
         imageVector = Icons.Outlined.Delete, // Replace with your desired icon
         contentDescription = "Clear", // Always set a content description for accessibility
         modifier = Modifier.size(41.dp).clickable { onClick() }, // Optional padding between icon and text
         tint = if(enabled) Color.Magenta.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.3f)
+    )
+}
+
+@Composable
+fun getInfoIcon(onClick: () -> Unit){
+    Icon(
+        imageVector = Icons.Outlined.QuestionMark, // Replace with your desired icon
+        contentDescription = "Info", // Always set a content description for accessibility
+        modifier = Modifier.size(41.dp).padding(start = 7.dp).clickable { onClick() }, // Optional padding between icon and text
+        tint = Color.White.copy(alpha = 0.7f)
     )
 }
