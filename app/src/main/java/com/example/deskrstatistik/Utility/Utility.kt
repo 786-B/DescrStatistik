@@ -1,51 +1,14 @@
 package com.example.deskrstatistik.Utility
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFromBaseline
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.ParagraphStyle
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.style.BaselineShift
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextDirection
-import androidx.compose.ui.text.style.TextIndent
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import java.math.BigDecimal
-import java.math.RoundingMode
 import kotlin.math.round
 
 
-fun trimZeros(input: String): String {
-    return try {
-        BigDecimal(input).stripTrailingZeros().toPlainString()
-    } catch (e: NumberFormatException) {
-        input // Return the original input if parsing fails
-    }
+fun roundToThreeDecimalPlaces(number: Number): String {
+    val roundedNumber = round(number.toDouble() * 1000) / 1000
+    return "%.3f".format(roundedNumber)
 }
 
-fun roundToThreeDecimalPlaces(number: Float): String {
-    val roundedNumber = round(number * 1000) / 1000
-    return "%.3f".format(roundedNumber).replace('.', ',')
-}
-
-fun roundToThreeDecimalPlacesDouble(average: Double): Double {
-    return BigDecimal(average).setScale(3, RoundingMode.HALF_EVEN).toDouble()
-}
-
+// zu 5
 fun arithmeticMean(anyList: List<Float>): String {
     if (anyList.isEmpty()) return "0.0"
     val sum = anyList.sum()
@@ -60,6 +23,7 @@ fun getSum(anyList: List<Float>): String {
     return roundToThreeDecimalPlaces(sum)
 }
 
+// zu 6
 fun List<Float>.median(): String {
     if (isEmpty()) return "0.0"
 
@@ -70,113 +34,62 @@ fun List<Float>.median(): String {
     }
 }
 
-@Composable
-fun getFormulaText(text: String, fontSize: Int = 20) {
-
-    return Text(text = text, color = Color.LightGray, fontSize = fontSize.sp)
-}
-
+// zu 7
 fun List<Float>.modes(): String {
     val frequencyMap = groupingBy { it }.eachCount()
     val maxFrequency = frequencyMap.maxOfOrNull { it.value } ?: return "0.0"
 
-    return frequencyMap.filter { it.value == maxFrequency }.keys.toList().toString()
+    return if (maxFrequency > 1) {
+        frequencyMap.filter { it.value == maxFrequency }.keys.toList().toString()
+    } else "0.0"
 }
 
-//annotated strings
-@Composable
-fun CharWithLowerChar(x: String, i: String) {
-    Text(buildAnnotatedString {
+// zu 8
+//Definition
+fun <T : Number> isQuantileCalculable(numbersList: List<T>, p: Double): Boolean {
+    val n = numbersList.size
 
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(
-                text = x,
-                modifier = Modifier.paddingFromBaseline(bottom = 9.dp),
-                fontSize = 20.sp,
-                fontFamily = FontFamily.Monospace,
-                color = Color.LightGray
-            )
+    // Überprüft, ob p im gültigen Bereich liegt
+    if (p <= 0.0 || p > 1.0) {
+        return false
+    }
 
-            // Subscript (i=1)
-            Text(
-                text = i,
-                fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace,
-                color = Color.LightGray
-            )
-        }
-    }, color = Color.LightGray)
+    // Überprüft die erste Bedingung: p < 1/n
+    if (p < (1.0 / n)) {
+        return false
+    }
+    // Wenn keine der Bedingungen zutrifft, ist das Quantil berechenbar
+    return true
 }
 
-@Composable
-fun SummationSymbol() {
-    Row(verticalAlignment = Alignment.Bottom) {
+//prüft ob ganzzahlig oder nicht
+fun isWholeNumber(value: Double): Boolean {
+    return value % 1.0 == 0.0
+}
 
-        // Summation symbol
-        Text(
-            text = "∑",
-            //to fit with the other part of the formula
-            modifier = Modifier.padding(bottom = 9.dp),
-            fontSize = 30.sp,
-            fontFamily = FontFamily.Monospace,
-            color = Color.LightGray
-        )
-        Column {
+//berücksichtigt ob np ganzzahlig ist und gibt das Element in der Position j zurück
+fun <T : Number> calculateQuantile(numbersList: List<T>, p: Double): String {
+    // Sortieren der Liste
+    val sortedList = numbersList.map { it.toDouble() }.sorted()
 
-            // Superscript (n)
-            Text(
-                text = "n",
-                //bottom alignment depends on "i=1"
-                modifier = Modifier.paddingFromBaseline(bottom = 11.dp),
-                fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace,
-                color = Color.LightGray
-            )
+    // Berechnen des Index für das Quantil
+    val np = p * sortedList.size
+    val j = np.toInt()
 
-            // Subscript (i=1)
-            Text(
-                text = "i=1",
-                //to make it fit
-                modifier = Modifier.height(23.dp),
-                fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace,
-                color = Color.LightGray
-            )
+    // Überprüfen, ob np ganzzahlig ist
+    return if (np % 1.0 != 0.0) {
+        // np ist nicht ganzzahlig
+        roundToThreeDecimalPlaces(sortedList[j])  // Nimmt den Wert bei Index j
+    } else {
+        // np ist ganzzahlig, und wir müssen sicherstellen, dass j kein Index außerhalb der Liste ist
+        if (j == sortedList.size) {
+            // Wenn j gleich der Größe der Liste ist, nehmen wir den letzten Wert in der Liste
+            roundToThreeDecimalPlaces(sortedList[j - 1])
+        } else {
+            // Mittelwert von Index j und j+1, wenn j nicht der letzte Index ist
+            roundToThreeDecimalPlaces(sortedList[j - 1] + sortedList[j]/ 2.0)
         }
     }
 }
 
-@Composable
-fun fractionBuilder(
-    x: String,
-    y: String,
-    fontSizeX: Int = 15,
-    fontSizeY: Int = 15,
-    lineheight: Int = 12
-) {
-    Text(
-        buildAnnotatedString {
-            withStyle(style = ParagraphStyle(lineHeight = lineheight.sp)) {
-                withStyle(
-                    style = SpanStyle(
-                        fontSize = fontSizeX.sp,
-                        color = Color.LightGray,
-                        fontFamily = FontFamily.Monospace,
-                        textDecoration = TextDecoration.Underline
-                    )
-                ) {
-                    append(x + "\n")
-                }
-                withStyle(
-                    style = SpanStyle(
-                        fontSize = fontSizeY.sp, color = Color.LightGray,
-                        fontFamily = FontFamily.Monospace
-                    )
-                ) {
-                    append(y)
-                }
-            }
-        }
-    )
-}
 

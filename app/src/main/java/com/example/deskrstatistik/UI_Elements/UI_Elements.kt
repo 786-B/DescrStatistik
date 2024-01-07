@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.QuestionMark
@@ -22,9 +21,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,6 +36,7 @@ fun NumberField(initialValue: String, onNumbersChange: (String) -> Unit) {
     var text by remember {
         mutableStateOf(initialValue)
     }
+    val isInvalidNumber = text.toFloatOrNull()?.let { it >= 10000.000f } == true
 
     OutlinedTextField(
         value = text,
@@ -51,9 +54,14 @@ fun NumberField(initialValue: String, onNumbersChange: (String) -> Unit) {
                 onNumbersChange(text)
                 text = ""
             }
-        ), colors = TextFieldDefaults.outlinedTextFieldColors(
+        ),
+        textStyle = TextStyle(
+            color = if (isInvalidNumber) Color.Red else Color.White,
+            textDecoration = if (isInvalidNumber) TextDecoration.LineThrough else TextDecoration.None
+        ),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = Color.Cyan.copy(alpha = 0.7f),
-            textColor = Color.White,
+            textColor = if (isInvalidNumber) Color.Red else Color.White,
             placeholderColor = Color.White.copy(alpha = 0.4f),
             cursorColor = Color.LightGray
         )
@@ -71,11 +79,26 @@ fun getClearIcon(enabled: Boolean = false, onClick: () -> Unit) {
 }
 
 @Composable
-fun getInfoIcon(onClick: () -> Unit){
+fun getQuestionIcon(onClick: () -> Unit){
     Icon(
         imageVector = Icons.Outlined.QuestionMark, // Replace with your desired icon
         contentDescription = "Info", // Always set a content description for accessibility
         modifier = Modifier.size(41.dp).padding(start = 7.dp).clickable { onClick() }, // Optional padding between icon and text
         tint = Color.White.copy(alpha = 0.7f)
     )
+}
+@Composable
+fun getInfoIcon(onClick: () -> Unit){
+    Icon(
+        imageVector = Icons.Outlined.Info, // Replace with your desired icon
+        contentDescription = "Info", // Always set a content description for accessibility
+        modifier = Modifier.size(41.dp).padding(start = 7.dp).clickable { onClick() }, // Optional padding between icon and text
+        tint = Color.White.copy(alpha = 0.7f)
+    )
+}
+
+@Composable
+fun getFormulaText(text: String, fontSize: Int = 15) {
+
+    return Text(text = text, color = Color.LightGray, fontSize = fontSize.sp)
 }

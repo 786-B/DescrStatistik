@@ -1,9 +1,8 @@
 package com.example.deskrstatistik.Screens
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
-import com.example.deskrstatistik.Utility.getFormulaText
+import com.example.deskrstatistik.UI_Elements.getFormulaText
 
 @Composable
 fun WeigtedMeanInfo(navCtrl: NavController,){

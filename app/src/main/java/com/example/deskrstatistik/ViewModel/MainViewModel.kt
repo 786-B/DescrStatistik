@@ -21,15 +21,21 @@ class MainViewModel : ViewModel() {
 
         val numbers: LiveData<String> = _numbers
 
-        fun onNumbersChange(input: String) {
-            viewModelScope.launch {
-                // Your existing logic to validate the input
-                val number = input.toFloatOrNull()
-                number?.let {
+    fun onNumbersChange(input: String) {
+        viewModelScope.launch {
+            // Your existing logic to validate the input
+            val number = input.toFloatOrNull()
+            number?.let {
+                // Check if the number is within the allowed range
+                if (it <= 10000.000f) {
                     _numbersList.value = (_numbersList.value + it).sorted()
+                } else {
+                    // Handle the case where the number is too large, e.g., show an error to the user
                 }
             }
         }
+    }
+
     fun getNumbersList(): List<Float> {
         return _numbersList.value
     }

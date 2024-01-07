@@ -16,19 +16,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.NavDeepLinkRequest
-import com.example.deskrstatistik.Navigation.NavRoutes
 import com.example.deskrstatistik.UI_Elements.NumberField
 import com.example.deskrstatistik.UI_Elements.getClearIcon
-import com.example.deskrstatistik.UI_Elements.getInfoIcon
+import com.example.deskrstatistik.UI_Elements.getFormulaText
 import com.example.deskrstatistik.Utility.CharWithLowerChar
 import com.example.deskrstatistik.Utility.SummationSymbol
 import com.example.deskrstatistik.Utility.arithmeticMean
+import com.example.deskrstatistik.Utility.calculateQuantile
 import com.example.deskrstatistik.Utility.fractionBuilder
-import com.example.deskrstatistik.Utility.getFormulaText
 import com.example.deskrstatistik.Utility.getSum
+import com.example.deskrstatistik.Utility.isQuantileCalculable
+import com.example.deskrstatistik.Utility.isWholeNumber
 import com.example.deskrstatistik.Utility.median
 import com.example.deskrstatistik.Utility.modes
 import com.example.deskrstatistik.ViewModel.MainViewModel
@@ -54,7 +53,8 @@ fun MainScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(7.dp)
-            .verticalScroll(scrollState), horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(scrollState),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         //1- contaminated text
         Text(text = numbers, color = Color.LightGray)
@@ -110,15 +110,14 @@ fun MainScreen(
                     getFormulaText(text = " (")
                     getFormulaText(text = "x(", fontSize = 13)
                     fractionBuilder(x = "n", y = "2", fontSizeX = 11, fontSizeY = 11)
-                    getFormulaText(text = ")", fontSize = 13)
-                    getFormulaText(text = " + x(", fontSize = 13)
+                    getFormulaText(text = ") + x(", fontSize = 13)
                     fractionBuilder(x = "n+1", y = " 2", fontSizeX = 11, fontSizeY = 11)
                     getFormulaText(text = ")", fontSize = 13)
                     getFormulaText(text = ") = ")
                     //----------------
                 }
             }
-            Text(text = "$median", color = Color.LightGray, fontSize = 20.sp)
+            getFormulaText(text = "$median")
         }
 
         Divider(modifier = Modifier.padding(5.dp))
@@ -127,28 +126,120 @@ fun MainScreen(
         val mod = numbersList.modes()
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "mod", i = "x")
-            getFormulaText(text = " := ")
-            getFormulaText(text = "$mod")
+            getFormulaText(text = " := $mod")
         }
-
         Divider(modifier = Modifier.padding(5.dp))
 
-        //8- weighted x̄
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            CharWithLowerChar(x = "x̄", i = "w")
-            getFormulaText(text = " := ")
-            SummationSymbol()
-            CharWithLowerChar(x = "w", i = "i")
-            CharWithLowerChar(x = "x", i = "i")
+        //8- quantil
+        // 0.1
+        if (isQuantileCalculable(numbersList, 0.1)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val q01 = calculateQuantile(numbersList, 0.1)
+                CharWithLowerChar(x = "q", i = "0.1", fontsizeX = 18, fontsizeY = 11)
+                getFormulaText(text = " = ", fontSize = 15)
+                if (isWholeNumber(0.1 * numbersList.size)) {
+                    fractionBuilder(
+                        x = "1",
+                        y = "2",
+                        lineheight = 14,
+                        fontSizeX = 13,
+                        fontSizeY = 13
+                    )
+                    getFormulaText(" (x(np) + x(np+1)) = ", fontSize = 15)
+                    getFormulaText("$q01", fontSize = 15)
+                } else {
+                    getFormulaText(text = "⌈np⌉ = $q01", fontSize = 15)
+                }
+            }
+            Divider(modifier = Modifier.padding(5.dp))
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            CharWithLowerChar(x = "w", i = "i")
-            getFormulaText(text = " = ")
-            CharWithLowerChar(x = "n", i = "i")
-            getFormulaText(text = "/n")
-            getInfoIcon {navCtrl.navigate(NavRoutes.WeightedMeanInfo.name)}
+        // 0.25
+        if (isQuantileCalculable(numbersList, 0.25)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CharWithLowerChar(x = "q", i = "4", fontsizeX = 18, fontsizeY = 11)
+                getFormulaText(text = " = ", fontSize = 15)
+                CharWithLowerChar(x = "q", i = "0.25", fontsizeX = 18, fontsizeY = 11)
+                getFormulaText(text = " = ", fontSize = 15)
+                val q025 = calculateQuantile(numbersList, 0.25)
+                if (isWholeNumber((0.25 * numbersList.size))) {
+                    fractionBuilder(
+                        x = "1",
+                        y = "2",
+                        lineheight = 14,
+                        fontSizeX = 13,
+                        fontSizeY = 13
+                    )
+                    getFormulaText(" (x(np) + x(np+1)) = ", fontSize = 15)
+                    getFormulaText("$q025", fontSize = 15)
+                } else {
+                    getFormulaText(text = "⌈np⌉ = $q025", fontSize = 15)
+                }
+            }
+            Divider(modifier = Modifier.padding(5.dp))
         }
-
-        Divider(modifier = Modifier.padding(5.dp))
+        //0.75
+        if (isQuantileCalculable(numbersList, 0.75)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                getFormulaText(text = "q⁴ = ", fontSize = 15)
+                CharWithLowerChar(x = "q", i = "0.75", fontsizeX = 18, fontsizeY = 11)
+                getFormulaText(text = " = ", fontSize = 15)
+                val q075 = calculateQuantile(numbersList, 0.75)
+                if (isWholeNumber(0.75 * numbersList.size)) {
+                    fractionBuilder(
+                        x = "1",
+                        y = "2",
+                        lineheight = 14,
+                        fontSizeX = 13,
+                        fontSizeY = 13
+                    )
+                    getFormulaText(" (x(np) + x(np+1)) = ", fontSize = 15)
+                    getFormulaText("$q075", fontSize = 15)
+                } else {
+                    getFormulaText(text = "⌈np⌉ = $q075", fontSize = 15)
+                }
+            }
+            Divider(modifier = Modifier.padding(5.dp))
+        }
+        //0.9
+        if (isQuantileCalculable(numbersList, 0.9 * numbersList.size)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CharWithLowerChar(x = "q", i = "0.9", fontsizeX = 15, fontsizeY = 9)
+                getFormulaText(text = " = ", fontSize = 15)
+                val q09 = calculateQuantile(numbersList, 0.9)
+                if (isWholeNumber(0.9)) {
+                    fractionBuilder(
+                        x = "1",
+                        y = "2",
+                        lineheight = 14,
+                        fontSizeX = 13,
+                        fontSizeY = 13
+                    )
+                    getFormulaText(" (x(np) + x(np+1)) = ", fontSize = 15)
+                    getFormulaText("$q09", fontSize = 15)
+                } else {
+                    getFormulaText(text = "⌈np⌉ = $q09", fontSize = 15)
+                }
+            }
+            Divider(modifier = Modifier.padding(5.dp))
+        }
     }
+
+    /*
+    //X- weighted x̄
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        CharWithLowerChar(x = "x̄", i = "w")
+        getFormulaText(text = " := ")
+        SummationSymbol()
+        CharWithLowerChar(x = "w", i = "i")
+        CharWithLowerChar(x = "x", i = "i")
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        CharWithLowerChar(x = "w", i = "i")
+        getFormulaText(text = " = ")
+        CharWithLowerChar(x = "n", i = "i")
+        getFormulaText(text = "/n")
+        getInfoIcon {navCtrl.navigate(NavRoutes.WeightedMeanInfo.name)}
+    }
+
+    Divider(modifier = Modifier.padding(5.dp))*/
 }
