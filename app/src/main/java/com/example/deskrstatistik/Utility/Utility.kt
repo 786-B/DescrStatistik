@@ -1,5 +1,6 @@
 package com.example.deskrstatistik.Utility
 
+import kotlin.math.pow
 import kotlin.math.round
 
 
@@ -68,7 +69,7 @@ fun isWholeNumber(value: Double): Boolean {
 }
 
 //berücksichtigt ob np ganzzahlig ist und gibt das Element in der Position j zurück
-fun <T : Number> calculateQuantile(numbersList: List<T>, p: Double): String {
+fun <T : Number> calculateQuantile(numbersList: List<T>, p: Double): Double {
     // Sortieren der Liste
     val sortedList = numbersList.map { it.toDouble() }.sorted()
 
@@ -79,17 +80,98 @@ fun <T : Number> calculateQuantile(numbersList: List<T>, p: Double): String {
     // Überprüfen, ob np ganzzahlig ist
     return if (np % 1.0 != 0.0) {
         // np ist nicht ganzzahlig
-        roundToThreeDecimalPlaces(sortedList[j])  // Nimmt den Wert bei Index j
+        sortedList[j] // Nimmt den Wert bei Index j
     } else {
         // np ist ganzzahlig, und wir müssen sicherstellen, dass j kein Index außerhalb der Liste ist
         if (j == sortedList.size) {
             // Wenn j gleich der Größe der Liste ist, nehmen wir den letzten Wert in der Liste
-            roundToThreeDecimalPlaces(sortedList[j - 1])
+            sortedList[j - 1]
         } else {
             // Mittelwert von Index j und j+1, wenn j nicht der letzte Index ist
-            roundToThreeDecimalPlaces(sortedList[j - 1] + sortedList[j]/ 2.0)
+            sortedList[j - 1] + sortedList[j] / 2.0
         }
     }
 }
 
+fun <T : Number> getQuantile(numbersList: List<T>, p: Double): String {
+    return roundToThreeDecimalPlaces(calculateQuantile(numbersList, p))
+}
 
+fun <T : Number> quartileDifference(numbersList: List<T>): Double {
+    return calculateQuantile(numbersList, 0.75) - calculateQuantile(numbersList, 0.25)
+}
+
+fun <T : Number> getQuantileDifference(numbersList: List<T>): String {
+    return roundToThreeDecimalPlaces(quartileDifference(numbersList))
+}
+
+
+// zu 9
+fun calculateVariance(anyList: List<Float>): Double {
+    // Wenn weniger als zwei Werte vorhanden sind, ist die Varianz 0
+    if (anyList.size <= 1) {
+        return 0.0
+    }
+    val sum = anyList.sum()
+    val average = sum / anyList.size
+
+    // Konvertiere jeden Float zu Double vor der Summierung
+    val sumOfSquaredDifferences = anyList.sumOf { (it - average).toDouble().pow(2) }
+    // Teile durch n-1, um die Stichprobenvarianz zu bekommen
+    // Konvertiere das Ergebnis zurück zu Float
+    return (sumOfSquaredDifferences / (anyList.size - 1))
+}
+
+fun getVariance(anyList: List<Float>): String {
+
+    return roundToThreeDecimalPlaces(calculateVariance(anyList))
+}
+
+//zu 10
+fun calculateStandardDeviation(anyList: List<Float>): Double {
+
+    return kotlin.math.sqrt(calculateVariance(anyList))
+}
+
+fun getStandardDeviation(anyList: List<Float>): String {
+
+    return roundToThreeDecimalPlaces(calculateStandardDeviation(anyList))
+}
+
+//zu 11
+fun calculateWingSpan(anyList: List<Float>): Float {
+    val maxElement = anyList.maxOrNull()
+    val minElement = anyList.minOrNull()
+
+    // If either maxElement or minElement is null, the list was empty, so return 0.0.
+    if (maxElement == null || minElement == null) {
+        return 0.0f
+    }
+
+    return maxElement - minElement
+}
+
+fun getWingSpan(anyList: List<Float>): String {
+
+    return roundToThreeDecimalPlaces(calculateWingSpan(anyList))
+}
+
+//zu 12
+fun coefficientOfVariation(anyList: List<Float>): Double {
+
+    if (anyList.isEmpty()) {
+
+        return 0.0
+    }
+    val StandardDeviation = calculateStandardDeviation(anyList)
+    val sum = anyList.sum()
+    val average = sum / anyList.size
+
+    return StandardDeviation / average
+
+}
+
+fun getCoefficientOfVariation(anyList: List<Float>): String {
+
+    return roundToThreeDecimalPlaces(coefficientOfVariation(anyList))
+}

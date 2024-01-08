@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 
 //annotated strings
 @Composable
-fun CharWithLowerChar(x: String, i: String, fontsizeX: Int = 18, fontsizeY: Int= 11) {
+fun CharWithLowerChar(x: String, i: String, fontsizeX: Int = 18, fontsizeY: Int = 11) {
     Text(buildAnnotatedString {
 
         Row(verticalAlignment = Alignment.Bottom) {
@@ -45,12 +45,12 @@ fun CharWithLowerChar(x: String, i: String, fontsizeX: Int = 18, fontsizeY: Int=
 }
 
 @Composable
-fun SummationSymbol() {
+fun CharWithHigherLowerSymbol(symbol: String = "∑", n: String = "n", i: String = "i=10") {
     Row(verticalAlignment = Alignment.Bottom) {
 
         // Summation symbol
         Text(
-            text = "∑",
+            text = symbol,
             //to fit with the other part of the formula
             modifier = Modifier.padding(bottom = 9.dp),
             fontSize = 30.sp,
@@ -61,7 +61,7 @@ fun SummationSymbol() {
 
             // Superscript (n)
             Text(
-                text = "n",
+                text = n,
                 //bottom alignment depends on "i=1"
                 modifier = Modifier.paddingFromBaseline(bottom = 11.dp),
                 fontSize = 12.sp,
@@ -71,7 +71,7 @@ fun SummationSymbol() {
 
             // Subscript (i=1)
             Text(
-                text = "i=1",
+                text = i,
                 //to make it fit
                 modifier = Modifier.height(23.dp),
                 fontSize = 12.sp,

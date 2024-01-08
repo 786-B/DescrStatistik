@@ -12,6 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,11 +24,18 @@ import com.example.deskrstatistik.UI_Elements.NumberField
 import com.example.deskrstatistik.UI_Elements.getClearIcon
 import com.example.deskrstatistik.UI_Elements.getFormulaText
 import com.example.deskrstatistik.Utility.CharWithLowerChar
-import com.example.deskrstatistik.Utility.SummationSymbol
+import com.example.deskrstatistik.Utility.CharWithHigherLowerSymbol
 import com.example.deskrstatistik.Utility.arithmeticMean
 import com.example.deskrstatistik.Utility.calculateQuantile
+import com.example.deskrstatistik.Utility.calculateVariance
 import com.example.deskrstatistik.Utility.fractionBuilder
+import com.example.deskrstatistik.Utility.getCoefficientOfVariation
+import com.example.deskrstatistik.Utility.getQuantile
+import com.example.deskrstatistik.Utility.getQuantileDifference
+import com.example.deskrstatistik.Utility.getStandardDeviation
 import com.example.deskrstatistik.Utility.getSum
+import com.example.deskrstatistik.Utility.getVariance
+import com.example.deskrstatistik.Utility.getWingSpan
 import com.example.deskrstatistik.Utility.isQuantileCalculable
 import com.example.deskrstatistik.Utility.isWholeNumber
 import com.example.deskrstatistik.Utility.median
@@ -40,7 +50,6 @@ fun MainScreen(
 
     val scrollState = rememberScrollState()
     val numbers by viewModel.numbers.observeAsState("")
-
     //---for futher operations, get the numbers
     val numbersList = viewModel.getNumbersList()
 
@@ -84,7 +93,7 @@ fun MainScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             getFormulaText(text = "x̄ := ")
             fractionBuilder(x = "1", y = "n")
-            SummationSymbol()
+            CharWithHigherLowerSymbol()
             CharWithLowerChar(x = "x", i = "i")
             Spacer(modifier = Modifier.padding(3.dp))
             getFormulaText(text = "= $arithmeticMean")
@@ -134,9 +143,9 @@ fun MainScreen(
         // 0.1
         if (isQuantileCalculable(numbersList, 0.1)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                val q01 = calculateQuantile(numbersList, 0.1)
-                CharWithLowerChar(x = "q", i = "0.1", fontsizeX = 18, fontsizeY = 11)
-                getFormulaText(text = " = ", fontSize = 15)
+                val q01 = getQuantile(numbersList, 0.1)
+                CharWithLowerChar(x = "q", i = "0.1")
+                getFormulaText(text = " = ")
                 if (isWholeNumber(0.1 * numbersList.size)) {
                     fractionBuilder(
                         x = "1",
@@ -145,10 +154,10 @@ fun MainScreen(
                         fontSizeX = 13,
                         fontSizeY = 13
                     )
-                    getFormulaText(" (x(np) + x(np+1)) = ", fontSize = 15)
-                    getFormulaText("$q01", fontSize = 15)
+                    getFormulaText(" (x(np) + x(np+1)) = ")
+                    getFormulaText("$q01")
                 } else {
-                    getFormulaText(text = "⌈np⌉ = $q01", fontSize = 15)
+                    getFormulaText(text = "⌈np⌉ = $q01")
                 }
             }
             Divider(modifier = Modifier.padding(5.dp))
@@ -156,11 +165,11 @@ fun MainScreen(
         // 0.25
         if (isQuantileCalculable(numbersList, 0.25)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                CharWithLowerChar(x = "q", i = "4", fontsizeX = 18, fontsizeY = 11)
-                getFormulaText(text = " = ", fontSize = 15)
-                CharWithLowerChar(x = "q", i = "0.25", fontsizeX = 18, fontsizeY = 11)
-                getFormulaText(text = " = ", fontSize = 15)
-                val q025 = calculateQuantile(numbersList, 0.25)
+                CharWithLowerChar(x = "q", i = "4")
+                getFormulaText(text = " = ")
+                CharWithLowerChar(x = "q", i = "0.25")
+                getFormulaText(text = " = ")
+                val q025 = getQuantile(numbersList, 0.25)
                 if (isWholeNumber((0.25 * numbersList.size))) {
                     fractionBuilder(
                         x = "1",
@@ -169,10 +178,10 @@ fun MainScreen(
                         fontSizeX = 13,
                         fontSizeY = 13
                     )
-                    getFormulaText(" (x(np) + x(np+1)) = ", fontSize = 15)
-                    getFormulaText("$q025", fontSize = 15)
+                    getFormulaText(" (x(np) + x(np+1)) = ")
+                    getFormulaText("$q025")
                 } else {
-                    getFormulaText(text = "⌈np⌉ = $q025", fontSize = 15)
+                    getFormulaText(text = "⌈np⌉ = $q025")
                 }
             }
             Divider(modifier = Modifier.padding(5.dp))
@@ -180,10 +189,10 @@ fun MainScreen(
         //0.75
         if (isQuantileCalculable(numbersList, 0.75)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                getFormulaText(text = "q⁴ = ", fontSize = 15)
-                CharWithLowerChar(x = "q", i = "0.75", fontsizeX = 18, fontsizeY = 11)
-                getFormulaText(text = " = ", fontSize = 15)
-                val q075 = calculateQuantile(numbersList, 0.75)
+                getFormulaText(text = "q⁴ = ")
+                CharWithLowerChar(x = "q", i = "0.75")
+                getFormulaText(text = " = ")
+                val q075 = getQuantile(numbersList, 0.75)
                 if (isWholeNumber(0.75 * numbersList.size)) {
                     fractionBuilder(
                         x = "1",
@@ -192,20 +201,20 @@ fun MainScreen(
                         fontSizeX = 13,
                         fontSizeY = 13
                     )
-                    getFormulaText(" (x(np) + x(np+1)) = ", fontSize = 15)
-                    getFormulaText("$q075", fontSize = 15)
+                    getFormulaText(" (x(np) + x(np+1)) = ")
+                    getFormulaText("$q075")
                 } else {
-                    getFormulaText(text = "⌈np⌉ = $q075", fontSize = 15)
+                    getFormulaText(text = "⌈np⌉ = $q075")
                 }
             }
             Divider(modifier = Modifier.padding(5.dp))
         }
         //0.9
-        if (isQuantileCalculable(numbersList, 0.9 * numbersList.size)) {
+        if (isQuantileCalculable(numbersList, 0.9)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                CharWithLowerChar(x = "q", i = "0.9", fontsizeX = 15, fontsizeY = 9)
-                getFormulaText(text = " = ", fontSize = 15)
-                val q09 = calculateQuantile(numbersList, 0.9)
+                CharWithLowerChar(x = "q", i = "0.9")
+                getFormulaText(text = " = ")
+                val q09 = getQuantile(numbersList, 0.9)
                 if (isWholeNumber(0.9)) {
                     fractionBuilder(
                         x = "1",
@@ -214,14 +223,61 @@ fun MainScreen(
                         fontSizeX = 13,
                         fontSizeY = 13
                     )
-                    getFormulaText(" (x(np) + x(np+1)) = ", fontSize = 15)
-                    getFormulaText("$q09", fontSize = 15)
+                    getFormulaText(" (x(np) + x(np+1)) = ")
+                    getFormulaText("$q09")
                 } else {
-                    getFormulaText(text = "⌈np⌉ = $q09", fontSize = 15)
+                    getFormulaText(text = "⌈np⌉ = $q09")
                 }
             }
             Divider(modifier = Modifier.padding(5.dp))
         }
+
+        // Quartilsdifference
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "qd", i = "x")
+            getFormulaText(text = " := q⁴ - ")
+            CharWithLowerChar(x = "q", i = "4")
+            CharWithLowerChar(x = "var", i = "x")
+            getFormulaText(text = ") = ${getQuantileDifference(numbersList)}")
+        }
+
+
+        // 9-Varianz
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "var", i = "x")
+            getFormulaText(text = " = ")
+            CharWithHigherLowerSymbol(symbol = "s", n = "²", i = "x")
+            getFormulaText(text = " := ")
+            CharWithHigherLowerSymbol()
+            fractionBuilder(x = "(xi - x̄)²", y = "(n-1)")
+            getFormulaText(text = " = ${getVariance(numbersList)}")
+        }
+
+        // 10-Standardabweichung
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "s", i = "x")
+            getFormulaText(text = " := √(")
+            CharWithLowerChar(x = "var", i = "x")
+            getFormulaText(text = ") = ${getStandardDeviation(numbersList)}")
+        }
+
+        // 11-Spannweite
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "R", i = "x")
+            getFormulaText(text = " := max(x) - min(x) = ")
+            CharWithLowerChar(x = "x", i = "(n)")
+            CharWithLowerChar(x = "x", i = "(1)")
+            getFormulaText(text = ") = ${getWingSpan(numbersList)}")
+        }
+
+        // 12-Variationskoeffizient (relative Standardabweichung)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "v", i = "x")
+            getFormulaText(text = " := ")
+            fractionBuilder(x = "sx", y = "̄x̄")
+            getFormulaText(text = ") = ${getCoefficientOfVariation(numbersList)}")
+        }
+
     }
 
     /*
