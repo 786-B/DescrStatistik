@@ -2,6 +2,7 @@ package com.example.deskrstatistik.Utility
 
 import kotlin.math.pow
 import kotlin.math.round
+import kotlin.math.sqrt
 
 
 fun roundToThreeDecimalPlaces(number: Number): String {
@@ -70,6 +71,10 @@ fun isWholeNumber(value: Double): Boolean {
 
 //berücksichtigt ob np ganzzahlig ist und gibt das Element in der Position j zurück
 fun <T : Number> calculateQuantile(numbersList: List<T>, p: Double): Double {
+
+    if(numbersList.isEmpty()){
+        return 0.0
+    }
     // Sortieren der Liste
     val sortedList = numbersList.map { it.toDouble() }.sorted()
 
@@ -174,4 +179,43 @@ fun coefficientOfVariation(anyList: List<Float>): Double {
 fun getCoefficientOfVariation(anyList: List<Float>): String {
 
     return roundToThreeDecimalPlaces(coefficientOfVariation(anyList))
+}
+
+//zu 13
+// Berechnung des arithmetischen Mittels
+fun mean(data: List<Float>): Float {
+    return data.sum() / data.size
+}
+
+// Berechnung der Standardabweichung
+fun standardDeviation(data: List<Float>): Float {
+    val mean = mean(data)
+    return sqrt(data.map { (it - mean).pow(2) }.sum() / (data.size - 1))
+}
+
+// Berechnung des dritten zentralen Moments
+fun thirdCentralMoment(data: List<Float>): Float {
+    val mean = mean(data)
+    return data.map { (it - mean).pow(3) }.sum() / (data.size - 1)
+}
+
+// Berechnung von sk1
+fun skewness1(data: List<Float>): Float {
+    val s = standardDeviation(data)
+    val m3 = thirdCentralMoment(data)
+    return m3 / s.pow(3)
+}
+
+// Berechnung von sk2
+fun skewness2(data: List<Float>, mode: Float): Float {
+    val mean = mean(data)
+    val s = standardDeviation(data)
+    return (mean - mode) / s
+}
+
+// Berechnung von sk3
+fun skewness3(data: List<Float>, median: Float): Float {
+    val mean = mean(data)
+    val s = standardDeviation(data)
+    return (mean - median) / s
 }
