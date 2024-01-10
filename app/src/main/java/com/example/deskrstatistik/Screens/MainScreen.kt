@@ -25,9 +25,15 @@ import com.example.deskrstatistik.UI_Elements.getClearIcon
 import com.example.deskrstatistik.UI_Elements.getFormulaText
 import com.example.deskrstatistik.Utility.FractionBuilder
 import com.example.deskrstatistik.Utility.arithmeticMean
+import com.example.deskrstatistik.Utility.getArithmeticMean
 import com.example.deskrstatistik.Utility.getCoefficientOfVariation
+import com.example.deskrstatistik.Utility.getMedian
+import com.example.deskrstatistik.Utility.getModes
 import com.example.deskrstatistik.Utility.getQuantile
 import com.example.deskrstatistik.Utility.getQuantileDifference
+import com.example.deskrstatistik.Utility.getSkewness1
+import com.example.deskrstatistik.Utility.getSkewness2
+import com.example.deskrstatistik.Utility.getSkewness3
 import com.example.deskrstatistik.Utility.getStandardDeviation
 import com.example.deskrstatistik.Utility.getSum
 import com.example.deskrstatistik.Utility.getVariance
@@ -85,7 +91,7 @@ fun MainScreen(
         Divider(modifier = Modifier.padding(5.dp))
 
         //5- x̄
-        val arithmeticMean = arithmeticMean(numbersList)
+        val arithmeticMean = getArithmeticMean(numbersList)
         Row(verticalAlignment = Alignment.CenterVertically) {
             getFormulaText(text = "x̄ := ")
             FractionBuilder(numerator = "1", denominator = "n")
@@ -98,7 +104,7 @@ fun MainScreen(
 
         //6- median
         val isOdd = numbersList.size % 2 == 1
-        val median = numbersList.median()
+        val median = getMedian(numbersList)
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "med", i = "x")
             getFormulaText(text = " := ")
@@ -143,7 +149,7 @@ fun MainScreen(
         Divider(modifier = Modifier.padding(5.dp))
 
         //7- modus
-        val mod = numbersList.modes()
+        val mod = getModes(numbersList)
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "mod", i = "x")
             getFormulaText(text = " := $mod")
@@ -256,7 +262,14 @@ fun MainScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "var", i = "x")
             getFormulaText(text = " = ")
-            CharWithHigherLowerSymbol(symbol = "s", n = "2", i = "x", fontsize = 20, bottomFromBaselineN =0, height = 21)
+            CharWithHigherLowerSymbol(
+                symbol = "s",
+                n = "2",
+                i = "x",
+                fontsize = 20,
+                bottomFromBaselineN = 0,
+                height = 21
+            )
             getFormulaText(text = " := ")
             CharWithHigherLowerSymbol()
             CharWithLowerChar(x = " (x", i = "i")
@@ -296,38 +309,78 @@ fun MainScreen(
         Divider(modifier = Modifier.padding(5.dp))
         // 13-Schiefekoeffizient-1
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CharWithLowerChar(x = "sk", i = "1")
-                getFormulaText(text = " := ")
-                getFormulaText(text = "(", fontSize = 23, color = Color.White)
-                FractionBuilder(numerator = " 1", denominator = "n-1")
-                CharWithHigherLowerSymbol()
-                CharWithLowerChar(x = "(x", i = "i")
-                getFormulaText(text = "-x̄)³")
-                getFormulaText(text = ")", fontSize = 23, color = Color.White)
-                getFormulaText(text = "/", fontSize = 23, color = Color.White)
-                CharWithHigherLowerSymbol(symbol = "s", n = "3", i = "x", fontsize = 20, bottomFromBaselineN =0, height = 21)
-            }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "sk", i = "1")
+            getFormulaText(text = " := ")
+            getFormulaText(text = "(", fontSize = 23, color = Color.White)
+            FractionBuilder(numerator = " 1", denominator = "n-1")
+            CharWithHigherLowerSymbol()
+            CharWithLowerChar(x = "(x", i = "i")
+            getFormulaText(text = "-x̄)³")
+            getFormulaText(text = ")", fontSize = 23, color = Color.White)
+            getFormulaText(text = "/", fontSize = 23, color = Color.White)
+            CharWithHigherLowerSymbol(
+                symbol = "s",
+                n = "3",
+                i = "x",
+                fontsize = 20,
+                bottomFromBaselineN = 0,
+                height = 21
+            )
+        }
+        getFormulaText(text = getSkewness1(numbersList))
         Divider(modifier = Modifier.padding(5.dp))
 
-    }
 
-    /*
-    //X- weighted x̄
+        // 13-Schiefekoeffizient-2
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "sk", i = "2")
+            getFormulaText(text = " := ")
+
+            getFormulaText(text = "(", fontSize = 23, color = Color.White)
+            getFormulaText(text = "x̄-")
+            CharWithLowerChar(x = "mod", i = "x", fontsizeX = 15, fontsizeY = 7)
+            getFormulaText(text = ")", fontSize = 23, color = Color.White)
+            getFormulaText(text = "/", fontSize = 23, color = Color.White)
+            CharWithLowerChar(x = "s", i = "x")
+        }
+        getFormulaText(text = getSkewness2(numbersList))
+        Divider(modifier = Modifier.padding(5.dp))
+
+
+    // 13-Schiefekoeffizient-3
+
     Row(verticalAlignment = Alignment.CenterVertically) {
-        CharWithLowerChar(x = "x̄", i = "w")
+        CharWithLowerChar(x = "sk", i = "3")
         getFormulaText(text = " := ")
-        SummationSymbol()
-        CharWithLowerChar(x = "w", i = "i")
-        CharWithLowerChar(x = "x", i = "i")
+        getFormulaText(text = "(", fontSize = 23, color = Color.White)
+        getFormulaText(text = "x̄-")
+        CharWithLowerChar(x = "med", i = "x", fontsizeX = 15, fontsizeY = 7)
+        getFormulaText(text = ")", fontSize = 23, color = Color.White)
+        getFormulaText(text = "/", fontSize = 23, color = Color.White)
+        CharWithLowerChar(x = "s", i = "x")
     }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        CharWithLowerChar(x = "w", i = "i")
-        getFormulaText(text = " = ")
-        CharWithLowerChar(x = "n", i = "i")
-        getFormulaText(text = "/n")
-        getInfoIcon {navCtrl.navigate(NavRoutes.WeightedMeanInfo.name)}
-    }
-
-    Divider(modifier = Modifier.padding(5.dp))*/
+        getFormulaText(text = getSkewness1(numbersList))
+    Divider(modifier = Modifier.padding(5.dp))
 }
+}
+/*
+//X- weighted x̄
+Row(verticalAlignment = Alignment.CenterVertically) {
+    CharWithLowerChar(x = "x̄", i = "w")
+    getFormulaText(text = " := ")
+    SummationSymbol()
+    CharWithLowerChar(x = "w", i = "i")
+    CharWithLowerChar(x = "x", i = "i")
+}
+Row(verticalAlignment = Alignment.CenterVertically) {
+    CharWithLowerChar(x = "w", i = "i")
+    getFormulaText(text = " = ")
+    CharWithLowerChar(x = "n", i = "i")
+    getFormulaText(text = "/n")
+    getInfoIcon {navCtrl.navigate(NavRoutes.WeightedMeanInfo.name)}
+}
+
+Divider(modifier = Modifier.padding(5.dp))*/
+
