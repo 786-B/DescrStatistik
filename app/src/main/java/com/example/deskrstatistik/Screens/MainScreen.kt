@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -23,10 +24,12 @@ import com.example.deskrstatistik.UI_Elements.CharWithLowerChar
 import com.example.deskrstatistik.UI_Elements.NumberField
 import com.example.deskrstatistik.UI_Elements.getClearIcon
 import com.example.deskrstatistik.UI_Elements.getFormulaText
+import com.example.deskrstatistik.UI_Elements.getHeadline
 import com.example.deskrstatistik.Utility.FractionBuilder
 import com.example.deskrstatistik.Utility.arithmeticMean
 import com.example.deskrstatistik.Utility.getArithmeticMean
 import com.example.deskrstatistik.Utility.getCoefficientOfVariation
+import com.example.deskrstatistik.Utility.getHeadlineDEActiveColor
 import com.example.deskrstatistik.Utility.getMedian
 import com.example.deskrstatistik.Utility.getModes
 import com.example.deskrstatistik.Utility.getQuantile
@@ -84,38 +87,120 @@ fun MainScreen(
 
         //4- sum
         val sum = if (listIsNotEmpty) getSum(numbersList) else 0.0
+        getHeadline(text = "Summe")
+        Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             getFormulaText(text = "∑ ", fontSize = 30)
-            getFormulaText(text = "$sum")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (numbersList.size > 1) {
+                getFormulaText(
+                    text = "${numbersList[0]}+..+${numbersList[numbersList.size - 1]} = "
+                )
+                getFormulaText(text = "$sum")
+            }
+
         }
         Divider(modifier = Modifier.padding(5.dp))
 
         //5- x̄
         val arithmeticMean = getArithmeticMean(numbersList)
+        getHeadline(text = "Arithmetische Mittel")
+        Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             getFormulaText(text = "x̄ := ")
             FractionBuilder(numerator = "1", denominator = "n")
             CharWithHigherLowerSymbol()
             CharWithLowerChar(x = "x", i = "i")
             Spacer(modifier = Modifier.padding(3.dp))
-            getFormulaText(text = "= $arithmeticMean")
+        }
+        if (numbersList.size > 1) {
+            Divider(modifier = Modifier.width(200.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                getFormulaText(text = "x̄ := ")
+                FractionBuilder(
+                    numerator = "1",
+                    denominator = "${numbersList.size}",
+                    lineHeight = 14
+                )
+                CharWithHigherLowerSymbol(n = "${numbersList.size}")
+                getFormulaText(
+                    text = "${numbersList[0]}+..+${numbersList[numbersList.size - 1]} = "
+                )
+                Spacer(modifier = Modifier.padding(3.dp))
+                getFormulaText(text = "$arithmeticMean")
+            }
         }
         Divider(modifier = Modifier.padding(5.dp))
 
         //6- median
         val isOdd = numbersList.size % 2 == 1
         val median = getMedian(numbersList)
+        getHeadline(text = "Median")
+        Spacer(modifier = Modifier.height(7.dp))
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "med", i = "x")
             getFormulaText(text = " := ")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            //isOdd----------
+            getFormulaText(text = "n is odd?", fontSize = 11)
+            getFormulaText(text = " = x(")
+            FractionBuilder(
+                numerator = "n+1",
+                denominator = " 2",
+                lineHeight = 14,
+                fontSizeDenominator = 13,
+                fontSizeNumerator = 13
+            )
+            getFormulaText(text = ")")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            //-even-----------
+            getFormulaText(text = "n is even? = ", fontSize = 11)
+            FractionBuilder(
+                numerator = "1",
+                denominator = "2",
+                fontSizeNumerator = 13,
+                fontSizeDenominator = 13
+            )
+            getFormulaText(text = " (")
+            getFormulaText(text = "x(", fontSize = 13)
+            FractionBuilder(
+                numerator = "n",
+                denominator = "2",
+                fontSizeNumerator = 11,
+                fontSizeDenominator = 11
+            )
+            getFormulaText(text = ") + x(", fontSize = 13)
+            FractionBuilder(
+                numerator = "n+1",
+                denominator = " 2",
+                fontSizeNumerator = 11,
+                fontSizeDenominator = 11
+            )
+            getFormulaText(text = ")", fontSize = 13)
+            getFormulaText(text = ")")
+            //----------------
+        }
+        Spacer(modifier = Modifier.height(5.dp))
 
-            if (listIsNotEmpty) {
+        if (numbersList.size > 1) {
+            Divider(modifier = Modifier.width(200.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
                 if (isOdd) {
+                    getFormulaText(text = "(odd!) = ", fontSize = 11)
                     //isOdd----------
                     getFormulaText(text = "x(")
-                    FractionBuilder(numerator = "n+1", denominator = " 2", lineHeight = 14)
-                    getFormulaText(text = ") = ")
+                    FractionBuilder(
+                        numerator = "${numbersList.size}+1",
+                        denominator = " 2"
+                    )
+                    getFormulaText(text = ") = $median")
                 } else {
+                    getFormulaText(text = "(even!) = ", fontSize = 11)
                     //-even-----------
                     FractionBuilder(
                         numerator = "1",
@@ -126,39 +211,47 @@ fun MainScreen(
                     getFormulaText(text = " (")
                     getFormulaText(text = "x(", fontSize = 13)
                     FractionBuilder(
-                        numerator = "n",
+                        numerator = "${numbersList.size}",
                         denominator = "2",
                         fontSizeNumerator = 11,
                         fontSizeDenominator = 11
                     )
                     getFormulaText(text = ") + x(", fontSize = 13)
                     FractionBuilder(
-                        numerator = "n+1",
+                        numerator = "${numbersList.size}+1",
                         denominator = " 2",
                         fontSizeNumerator = 11,
                         fontSizeDenominator = 11
                     )
                     getFormulaText(text = ")", fontSize = 13)
-                    getFormulaText(text = ") = ")
+                    getFormulaText(text = ") = $median")
                     //----------------
                 }
             }
-            getFormulaText(text = "$median")
         }
 
         Divider(modifier = Modifier.padding(5.dp))
 
         //7- modus
         val mod = getModes(numbersList)
+        getHeadline(text = "Modus")
+        Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "mod", i = "x")
-            getFormulaText(text = " := $mod")
+            if (numbersList.size > 1) {
+                getFormulaText(text = " := $mod")
+            } else {
+                getFormulaText(text = " := - ")
+            }
         }
         Divider(modifier = Modifier.padding(5.dp))
 
         //8- quantil
+        getHeadline(text = "Platzhalter für die Formeln")
         // 0.1
+        getHeadline(text = "0.1-Quantil", color = getHeadlineDEActiveColor(numbersList= numbersList, quantile = 0.1))
         if (isQuantileCalculable(numbersList, 0.1)) {
+            Spacer(modifier = Modifier.height(7.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val q01 = getQuantile(numbersList, 0.1)
                 CharWithLowerChar(x = "q", i = "0.1")
@@ -177,10 +270,13 @@ fun MainScreen(
                     getFormulaText(text = "⌈np⌉ = $q01")
                 }
             }
-            Divider(modifier = Modifier.padding(5.dp))
         }
+        Divider(modifier = Modifier.padding(5.dp))
+
         // 0.25
+        getHeadline(text = "0.25-Quantil", color = getHeadlineDEActiveColor(numbersList= numbersList, quantile = 0.25))
         if (isQuantileCalculable(numbersList, 0.25)) {
+            Spacer(modifier = Modifier.height(7.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CharWithLowerChar(x = "q", i = "4")
                 getFormulaText(text = " = ")
@@ -201,10 +297,14 @@ fun MainScreen(
                     getFormulaText(text = "⌈np⌉ = $q025")
                 }
             }
-            Divider(modifier = Modifier.padding(5.dp))
         }
+        Divider(modifier = Modifier.padding(5.dp))
+
         //0.75
+        getHeadline(text = "0.75-Quantil", color = getHeadlineDEActiveColor(numbersList= numbersList, quantile = 0.75))
         if (isQuantileCalculable(numbersList, 0.75)) {
+
+            Spacer(modifier = Modifier.height(7.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 getFormulaText(text = "q⁴ = ")
                 CharWithLowerChar(x = "q", i = "0.75")
@@ -227,7 +327,9 @@ fun MainScreen(
             Divider(modifier = Modifier.padding(5.dp))
         }
         //0.9
+        getHeadline(text = "0.9-Quantil", color = getHeadlineDEActiveColor(numbersList= numbersList, quantile = 0.9))
         if (isQuantileCalculable(numbersList, 0.9)) {
+            Spacer(modifier = Modifier.height(7.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CharWithLowerChar(x = "q", i = "0.9")
                 getFormulaText(text = " = ")
@@ -250,15 +352,18 @@ fun MainScreen(
         }
 
         // Quartilsdifference
+        getHeadline(text = "Quartilsdifferenz")
+        Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "qd", i = "x")
             getFormulaText(text = " := q⁴ - ")
             CharWithLowerChar(x = "q", i = "4")
             getFormulaText(text = " = ${getQuantileDifference(numbersList)}")
         }
-
         Divider(modifier = Modifier.padding(5.dp))
         // 9-Varianz
+        getHeadline(text = "Varianz")
+        Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "var", i = "x")
             getFormulaText(text = " = ")
@@ -280,6 +385,8 @@ fun MainScreen(
         getFormulaText(text = "${getVariance(numbersList)}")
         Divider(modifier = Modifier.padding(5.dp))
         // 10-Standardabweichung
+        getHeadline(text = "Standardabweichung")
+        Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "s", i = "x")
             getFormulaText(text = " := √(")
@@ -288,6 +395,8 @@ fun MainScreen(
         }
         Divider(modifier = Modifier.padding(5.dp))
         // 11-Spannweite
+        getHeadline(text = "Spannweite")
+        Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "R", i = "x")
             getFormulaText(text = " := max(x) - min(x) = ")
@@ -298,6 +407,8 @@ fun MainScreen(
         getFormulaText(text = "${getWingSpan(numbersList)}")
         Divider(modifier = Modifier.padding(5.dp))
         // 12-Variationskoeffizient (relative Standardabweichung)
+        getHeadline(text = "Variationskoeffizient")
+        Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "v", i = "x")
             getFormulaText(text = " := ")
@@ -308,7 +419,8 @@ fun MainScreen(
         }
         Divider(modifier = Modifier.padding(5.dp))
         // 13-Schiefekoeffizient-1
-
+        getHeadline(text = "Schiefekoeffizienten")
+        Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "sk", i = "1")
             getFormulaText(text = " := ")
@@ -329,7 +441,7 @@ fun MainScreen(
             )
         }
         getFormulaText(text = getSkewness1(numbersList))
-        Divider(modifier = Modifier.padding(5.dp))
+        Divider(modifier = Modifier.padding(2.dp))
 
 
         // 13-Schiefekoeffizient-2
@@ -337,7 +449,6 @@ fun MainScreen(
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "sk", i = "2")
             getFormulaText(text = " := ")
-
             getFormulaText(text = "(", fontSize = 23, color = Color.White)
             getFormulaText(text = "x̄-")
             CharWithLowerChar(x = "mod", i = "x", fontsizeX = 15, fontsizeY = 7)
@@ -346,24 +457,24 @@ fun MainScreen(
             CharWithLowerChar(x = "s", i = "x")
         }
         getFormulaText(text = getSkewness2(numbersList))
-        Divider(modifier = Modifier.padding(5.dp))
+        Divider(modifier = Modifier.padding(2.dp))
 
 
-    // 13-Schiefekoeffizient-3
+        // 13-Schiefekoeffizient-3
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        CharWithLowerChar(x = "sk", i = "3")
-        getFormulaText(text = " := ")
-        getFormulaText(text = "(", fontSize = 23, color = Color.White)
-        getFormulaText(text = "x̄-")
-        CharWithLowerChar(x = "med", i = "x", fontsizeX = 15, fontsizeY = 7)
-        getFormulaText(text = ")", fontSize = 23, color = Color.White)
-        getFormulaText(text = "/", fontSize = 23, color = Color.White)
-        CharWithLowerChar(x = "s", i = "x")
-    }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "sk", i = "3")
+            getFormulaText(text = " := ")
+            getFormulaText(text = "(", fontSize = 23, color = Color.White)
+            getFormulaText(text = "x̄-")
+            CharWithLowerChar(x = "med", i = "x", fontsizeX = 15, fontsizeY = 7)
+            getFormulaText(text = ")", fontSize = 23, color = Color.White)
+            getFormulaText(text = "/", fontSize = 23, color = Color.White)
+            CharWithLowerChar(x = "s", i = "x")
+        }
         getFormulaText(text = getSkewness1(numbersList))
-    Divider(modifier = Modifier.padding(5.dp))
-}
+        Divider(modifier = Modifier.padding(5.dp))
+    }
 }
 /*
 //X- weighted x̄

@@ -1,5 +1,6 @@
 package com.example.deskrstatistik.Utility
 
+import androidx.compose.ui.graphics.Color
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sqrt
@@ -281,4 +282,8 @@ fun phiDispersionMeasure(data: List<Int>): Double {
     }
 
     return phi_min / (phi_min + phi_max)
+}
+
+fun getHeadlineDEActiveColor(numbersList: List<Float>, quantile: Double): Color {
+    return if(isQuantileCalculable(numbersList, quantile)) Color.LightGray else Color.LightGray.copy(alpha = .3f)
 }

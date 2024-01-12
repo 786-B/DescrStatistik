@@ -26,8 +26,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
@@ -116,6 +119,11 @@ fun getInfoIcon(onClick: () -> Unit) {
 fun getFormulaText(text: String, fontSize: Int = 15, color: Color = Color.LightGray) {
 
     return Text(text = text, color = color, fontSize = fontSize.sp)
+}
+@Composable
+fun getHeadline(text: String, fontSize: Int = 15, color: Color = Color.LightGray) {
+
+    return Text(text = text, color = color, fontSize = fontSize.sp, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold)
 }
 
 @Composable
