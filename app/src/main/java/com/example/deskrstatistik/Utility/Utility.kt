@@ -73,7 +73,7 @@ fun <T : Number> isQuantileCalculable(numbersList: List<T>, p: Double): Boolean 
     val n = numbersList.size
 
     // Überprüft, ob p im gültigen Bereich liegt
-    if (p <= 0.0 || p > 1.0) {
+    if (p <= 0.0 || p >= 1.0) {
         return false
     }
 
@@ -285,5 +285,5 @@ fun phiDispersionMeasure(data: List<Int>): Double {
 }
 
 fun getHeadlineDEActiveColor(numbersList: List<Float>, quantile: Double): Color {
-    return if(isQuantileCalculable(numbersList, quantile)) Color.LightGray else Color.LightGray.copy(alpha = .3f)
+    return if(isQuantileCalculable(numbersList, quantile)) Color.LightGray else Color.LightGray.copy(alpha = .5f)
 }

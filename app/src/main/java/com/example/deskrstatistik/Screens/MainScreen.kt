@@ -22,11 +22,13 @@ import androidx.navigation.NavController
 import com.example.deskrstatistik.UI_Elements.CharWithHigherLowerSymbol
 import com.example.deskrstatistik.UI_Elements.CharWithLowerChar
 import com.example.deskrstatistik.UI_Elements.NumberField
+import com.example.deskrstatistik.UI_Elements.getCheckIcon
 import com.example.deskrstatistik.UI_Elements.getClearIcon
+import com.example.deskrstatistik.UI_Elements.getFalseIcon
 import com.example.deskrstatistik.UI_Elements.getFormulaText
 import com.example.deskrstatistik.UI_Elements.getHeadline
+import com.example.deskrstatistik.UI_Elements.getQuantilElements
 import com.example.deskrstatistik.Utility.FractionBuilder
-import com.example.deskrstatistik.Utility.arithmeticMean
 import com.example.deskrstatistik.Utility.getArithmeticMean
 import com.example.deskrstatistik.Utility.getCoefficientOfVariation
 import com.example.deskrstatistik.Utility.getHeadlineDEActiveColor
@@ -36,15 +38,12 @@ import com.example.deskrstatistik.Utility.getQuantile
 import com.example.deskrstatistik.Utility.getQuantileDifference
 import com.example.deskrstatistik.Utility.getSkewness1
 import com.example.deskrstatistik.Utility.getSkewness2
-import com.example.deskrstatistik.Utility.getSkewness3
 import com.example.deskrstatistik.Utility.getStandardDeviation
 import com.example.deskrstatistik.Utility.getSum
 import com.example.deskrstatistik.Utility.getVariance
 import com.example.deskrstatistik.Utility.getWingSpan
 import com.example.deskrstatistik.Utility.isQuantileCalculable
 import com.example.deskrstatistik.Utility.isWholeNumber
-import com.example.deskrstatistik.Utility.median
-import com.example.deskrstatistik.Utility.modes
 import com.example.deskrstatistik.ViewModel.MainViewModel
 
 @Composable
@@ -238,119 +237,68 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "mod", i = "x")
-            if (numbersList.size > 1) {
-                getFormulaText(text = " := $mod")
-            } else {
-                getFormulaText(text = " := - ")
-            }
+            getFormulaText(text = " := $mod")
+
         }
         Divider(modifier = Modifier.padding(5.dp))
 
         //8- quantil
-        getHeadline(text = "Platzhalter für die Formeln")
-        // 0.1
-        getHeadline(text = "0.1-Quantil", color = getHeadlineDEActiveColor(numbersList= numbersList, quantile = 0.1))
-        if (isQuantileCalculable(numbersList, 0.1)) {
-            Spacer(modifier = Modifier.height(7.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                val q01 = getQuantile(numbersList, 0.1)
-                CharWithLowerChar(x = "q", i = "0.1")
-                getFormulaText(text = " = ")
-                if (isWholeNumber(0.1 * numbersList.size)) {
-                    FractionBuilder(
-                        numerator = "1",
-                        denominator = "2",
-                        lineHeight = 14,
-                        fontSizeNumerator = 13,
-                        fontSizeDenominator = 13
-                    )
-                    getFormulaText(" (x(np) + x(np+1)) = ")
-                    getFormulaText("$q01")
-                } else {
-                    getFormulaText(text = "⌈np⌉ = $q01")
-                }
-            }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            getFormulaText(text = "p-Quantil, p ∈ [0,1], ")
+            getFormulaText(text = "x⌊")
+            getFormulaText(text = "np", fontSize = 11)
+            getFormulaText(text = "⌋ ≤ ")
+            CharWithLowerChar(x = "Q", i = "p")
+            getFormulaText(text = " ≥")
+            getFormulaText(text = "x⌊")
+            getFormulaText(text = "np", fontSize = 11)
+            getFormulaText(text = "⌋")
         }
-        Divider(modifier = Modifier.padding(5.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            getFormulaText(text = "Vorausgesetzt: p > ")
+            FractionBuilder(numerator = "1", denominator = "n")
+            getFormulaText(text = " & p < 1")
+        }
+        Divider(modifier = Modifier.width(200.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "Q", i = "p")
+            getFormulaText(text = " := ")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            //isOdd----------
+            getFormulaText(text = "n is odd?", fontSize = 11)
+            getFormulaText(text = " = x(⌈np⌉)")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            //-even-----------
+            getFormulaText(text = "n is even? = ", fontSize = 11)
+            FractionBuilder(
+                numerator = "x(np)+x(np+1)",
+                denominator = "     2",
+                fontSizeNumerator = 13,
+                fontSizeDenominator = 13,
+                lineHeight = 14
+            )
+        }
+        Divider(modifier = Modifier.width(200.dp))
+        Spacer(modifier = Modifier.height(5.dp))
+        // 0.1
+        getQuantilElements(numbersList = numbersList, quantile = 0.1, quantileText = "0.1")
+
+        Divider(modifier = Modifier.width(200.dp))
 
         // 0.25
-        getHeadline(text = "0.25-Quantil", color = getHeadlineDEActiveColor(numbersList= numbersList, quantile = 0.25))
-        if (isQuantileCalculable(numbersList, 0.25)) {
-            Spacer(modifier = Modifier.height(7.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CharWithLowerChar(x = "q", i = "4")
-                getFormulaText(text = " = ")
-                CharWithLowerChar(x = "q", i = "0.25")
-                getFormulaText(text = " = ")
-                val q025 = getQuantile(numbersList, 0.25)
-                if (isWholeNumber((0.25 * numbersList.size))) {
-                    FractionBuilder(
-                        numerator = "1",
-                        denominator = "2",
-                        lineHeight = 14,
-                        fontSizeNumerator = 13,
-                        fontSizeDenominator = 13
-                    )
-                    getFormulaText(" (x(np) + x(np+1)) = ")
-                    getFormulaText("$q025")
-                } else {
-                    getFormulaText(text = "⌈np⌉ = $q025")
-                }
-            }
-        }
-        Divider(modifier = Modifier.padding(5.dp))
+        getQuantilElements(numbersList = numbersList, quantile = 0.25, quantileText = "0.25")
+        Divider(modifier = Modifier.width(200.dp))
 
         //0.75
-        getHeadline(text = "0.75-Quantil", color = getHeadlineDEActiveColor(numbersList= numbersList, quantile = 0.75))
-        if (isQuantileCalculable(numbersList, 0.75)) {
+        getQuantilElements(numbersList = numbersList, quantile = 0.75, quantileText = "0.75")
+        Divider(modifier = Modifier.width(200.dp))
 
-            Spacer(modifier = Modifier.height(7.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                getFormulaText(text = "q⁴ = ")
-                CharWithLowerChar(x = "q", i = "0.75")
-                getFormulaText(text = " = ")
-                val q075 = getQuantile(numbersList, 0.75)
-                if (isWholeNumber(0.75 * numbersList.size)) {
-                    FractionBuilder(
-                        numerator = "1",
-                        denominator = "2",
-                        lineHeight = 14,
-                        fontSizeNumerator = 13,
-                        fontSizeDenominator = 13
-                    )
-                    getFormulaText(" (x(np) + x(np+1)) = ")
-                    getFormulaText("$q075")
-                } else {
-                    getFormulaText(text = "⌈np⌉ = $q075")
-                }
-            }
-            Divider(modifier = Modifier.padding(5.dp))
-        }
         //0.9
-        getHeadline(text = "0.9-Quantil", color = getHeadlineDEActiveColor(numbersList= numbersList, quantile = 0.9))
-        if (isQuantileCalculable(numbersList, 0.9)) {
-            Spacer(modifier = Modifier.height(7.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                CharWithLowerChar(x = "q", i = "0.9")
-                getFormulaText(text = " = ")
-                val q09 = getQuantile(numbersList, 0.9)
-                if (isWholeNumber(0.9)) {
-                    FractionBuilder(
-                        numerator = "1",
-                        denominator = "2",
-                        lineHeight = 14,
-                        fontSizeNumerator = 13,
-                        fontSizeDenominator = 13
-                    )
-                    getFormulaText(" (x(np) + x(np+1)) = ")
-                    getFormulaText("$q09")
-                } else {
-                    getFormulaText(text = "⌈np⌉ = $q09")
-                }
-            }
-            Divider(modifier = Modifier.padding(5.dp))
-        }
-
+        getQuantilElements(numbersList = numbersList, quantile = 0.9, quantileText = "0.9")
+        Divider(modifier = Modifier.padding(5.dp))
         // Quartilsdifference
         getHeadline(text = "Quartilsdifferenz")
         Spacer(modifier = Modifier.height(7.dp))
@@ -476,6 +424,8 @@ fun MainScreen(
         Divider(modifier = Modifier.padding(5.dp))
     }
 }
+
+
 /*
 //X- weighted x̄
 Row(verticalAlignment = Alignment.CenterVertically) {

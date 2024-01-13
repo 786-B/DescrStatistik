@@ -3,6 +3,7 @@ package com.example.deskrstatistik.UI_Elements
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
@@ -10,6 +11,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.QuestionMark
@@ -36,6 +40,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.deskrstatistik.Utility.FractionBuilder
+import com.example.deskrstatistik.Utility.getHeadlineDEActiveColor
+import com.example.deskrstatistik.Utility.getQuantile
+import com.example.deskrstatistik.Utility.isQuantileCalculable
+import com.example.deskrstatistik.Utility.isWholeNumber
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,28 +99,28 @@ fun getClearIcon(enabled: Boolean = false, onClick: () -> Unit) {
 }
 
 @Composable
-fun getQuestionIcon(onClick: () -> Unit) {
+fun getCheckIcon(onClick: () -> Unit) {
     Icon(
-        imageVector = Icons.Outlined.QuestionMark, // Replace with your desired icon
-        contentDescription = "Info", // Always set a content description for accessibility
+        imageVector = Icons.Outlined.Check, // Replace with your desired icon
+        contentDescription = "Check", // Always set a content description for accessibility
         modifier = Modifier
-            .size(41.dp)
+            .size(31.dp)
             .padding(start = 7.dp)
             .clickable { onClick() }, // Optional padding between icon and text
-        tint = Color.White.copy(alpha = 0.7f)
+        tint = Color.Green.copy(alpha = 0.7f)
     )
 }
 
 @Composable
-fun getInfoIcon(onClick: () -> Unit) {
+fun getFalseIcon(onClick: () -> Unit) {
     Icon(
-        imageVector = Icons.Outlined.Info, // Replace with your desired icon
-        contentDescription = "Info", // Always set a content description for accessibility
+        imageVector = Icons.Outlined.Block, // Replace with your desired icon
+        contentDescription = "Block", // Always set a content description for accessibility
         modifier = Modifier
-            .size(41.dp)
+            .size(31.dp)
             .padding(start = 7.dp)
             .clickable { onClick() }, // Optional padding between icon and text
-        tint = Color.White.copy(alpha = 0.7f)
+        tint = Color.Red.copy(alpha = 0.7f)
     )
 }
 
@@ -188,6 +197,56 @@ fun CharWithHigherLowerSymbol(
                 fontFamily = FontFamily.Monospace,
                 color = Color.LightGray
             )
+        }
+    }
+}
+
+@Composable
+fun getQuantilElements(numbersList: List<Float>, quantile: Double, quantileText: String) {
+    val isQuantileX = isQuantileCalculable(numbersList, quantile)
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        getHeadline(
+            text = "$quantileText-Quantil", color = getHeadlineDEActiveColor(numbersList, quantile)
+        )
+        if (isQuantileX) {
+            getCheckIcon {
+            }
+        } else {
+            getFalseIcon {
+            }
+        }
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        getFormulaText(text = "p < 1", color = Color.Green.copy(alpha = 0.8f))
+        getFormulaText(text = " & ", color = Color.White.copy(alpha = 0.8f))
+        if (isQuantileX) {
+            getFormulaText(text = "p ≥ 1/n", color = Color.Green.copy(alpha = 0.8f))
+        } else {
+            getFormulaText(text = "p < 1/n", color = Color.Red.copy(alpha = 0.8f))
+        }
+    }
+    if (isQuantileX) {
+        Spacer(modifier = Modifier.height(7.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CharWithLowerChar(x = "q", i = quantileText)
+            getFormulaText(text = " = $quantileText * ${numbersList.size} = ")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val q0x = getQuantile(numbersList, quantile)
+            if (isWholeNumber(quantile * numbersList.size)) {
+                FractionBuilder(
+                    numerator = "1",
+                    denominator = "2",
+                    lineHeight = 14,
+                    fontSizeNumerator = 13,
+                    fontSizeDenominator = 13
+                )
+                getFormulaText(" (x(${numbersList.size * quantile}) + x(${numbersList.size * quantile}+1)) = ")
+                getFormulaText("$q0x")
+
+            } else {
+                getFormulaText(text = "x⌈${numbersList.size * quantile}⌉ = $q0x")
+            }
         }
     }
 }
