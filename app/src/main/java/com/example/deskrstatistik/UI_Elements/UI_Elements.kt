@@ -114,10 +114,10 @@ fun getCheckIcon(onClick: () -> Unit) {
 @Composable
 fun getFalseIcon(onClick: () -> Unit) {
     Icon(
-        imageVector = Icons.Outlined.Block, // Replace with your desired icon
+        imageVector = Icons.Outlined.Block,
         contentDescription = "Block", // Always set a content description for accessibility
         modifier = Modifier
-            .size(31.dp)
+            .size(25.dp)
             .padding(start = 7.dp)
             .clickable { onClick() }, // Optional padding between icon and text
         tint = Color.Red.copy(alpha = 0.7f)
@@ -136,13 +136,13 @@ fun getHeadline(text: String, fontSize: Int = 15, color: Color = Color.LightGray
 }
 
 @Composable
-fun CharWithLowerChar(x: String, i: String, fontsizeX: Int = 18, fontsizeY: Int = 11) {
+fun CharWithLowerChar(x: String, i: String, fontsizeX: Int = 18, fontsizeY: Int = 11, color: Color = Color.LightGray) {
     Row(verticalAlignment = Alignment.Bottom) {
         Text(
             text = x,
             fontSize = fontsizeX.sp,
             fontFamily = FontFamily.Monospace,
-            color = Color.LightGray
+            color = color
         )
 
         // Subscript (i=1)
@@ -151,7 +151,7 @@ fun CharWithLowerChar(x: String, i: String, fontsizeX: Int = 18, fontsizeY: Int 
             modifier = Modifier.paddingFromBaseline(bottom = 3.dp),
             fontSize = fontsizeY.sp,
             fontFamily = FontFamily.Monospace,
-            color = Color.LightGray
+            color = color
         )
     }
 }
@@ -242,10 +242,11 @@ fun getQuantilElements(numbersList: List<Float>, quantile: Double, quantileText:
                     fontSizeDenominator = 13
                 )
                 getFormulaText(" (x(${numbersList.size * quantile}) + x(${numbersList.size * quantile}+1)) = ")
-                getFormulaText("$q0x")
+                getFormulaText("$q0x", color = Color.Green.copy(alpha = .8f))
 
             } else {
-                getFormulaText(text = "x⌈${numbersList.size * quantile}⌉ = $q0x")
+                getFormulaText(text = "x⌈${numbersList.size * quantile}⌉ = ")
+                getFormulaText(text = "$q0x", color = Color.Green.copy(alpha = .8f))
             }
         }
     }

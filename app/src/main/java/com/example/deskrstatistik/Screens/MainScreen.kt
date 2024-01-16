@@ -96,7 +96,7 @@ fun MainScreen(
                 getFormulaText(
                     text = "${numbersList[0]}+..+${numbersList[numbersList.size - 1]} = "
                 )
-                getFormulaText(text = "$sum")
+                getFormulaText(text = "$sum", color = Color.Green.copy(alpha = .8f))
             }
 
         }
@@ -127,7 +127,7 @@ fun MainScreen(
                     text = "${numbersList[0]}+..+${numbersList[numbersList.size - 1]} = "
                 )
                 Spacer(modifier = Modifier.padding(3.dp))
-                getFormulaText(text = "$arithmeticMean")
+                getFormulaText(text = "$arithmeticMean", color = Color.Green.copy(alpha = .8f))
             }
         }
         Divider(modifier = Modifier.padding(5.dp))
@@ -197,7 +197,8 @@ fun MainScreen(
                         numerator = "${numbersList.size}+1",
                         denominator = " 2"
                     )
-                    getFormulaText(text = ") = $median")
+                    getFormulaText(text = ") = ")
+                    getFormulaText(text = "$median", color = Color.Green.copy(alpha = .8f))
                 } else {
                     getFormulaText(text = "(even!) = ", fontSize = 11)
                     //-even-----------
@@ -223,7 +224,8 @@ fun MainScreen(
                         fontSizeDenominator = 11
                     )
                     getFormulaText(text = ")", fontSize = 13)
-                    getFormulaText(text = ") = $median")
+                    getFormulaText(text = ") = ")
+                    getFormulaText(text = "$median", color = Color.Green.copy(alpha = .8f))
                     //----------------
                 }
             }
@@ -237,7 +239,8 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             CharWithLowerChar(x = "mod", i = "x")
-            getFormulaText(text = " := $mod")
+            getFormulaText(text = " :=")
+            getFormulaText(text = " $mod", color = Color.Green.copy(alpha = .8f))
 
         }
         Divider(modifier = Modifier.padding(5.dp))
@@ -281,8 +284,8 @@ fun MainScreen(
                 lineHeight = 14
             )
         }
-        Divider(modifier = Modifier.width(200.dp))
-        Spacer(modifier = Modifier.height(5.dp))
+        Divider(modifier = Modifier.width(300.dp), thickness = 2.dp)
+        Spacer(modifier = Modifier.height(9.dp))
         // 0.1
         getQuantilElements(numbersList = numbersList, quantile = 0.1, quantileText = "0.1")
 
@@ -299,15 +302,44 @@ fun MainScreen(
         //0.9
         getQuantilElements(numbersList = numbersList, quantile = 0.9, quantileText = "0.9")
         Divider(modifier = Modifier.padding(5.dp))
+
         // Quartilsdifference
         getHeadline(text = "Quartilsdifferenz")
         Spacer(modifier = Modifier.height(7.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
+            val colorFor25 = if (isQuantileCalculable(
+                    numbersList,
+                    0.25
+                )
+            ) Color.Green.copy(alpha = 0.8f) else Color.Red.copy(alpha = 0.8f)
+            val colorFor75 = if (isQuantileCalculable(
+                    numbersList,
+                    0.75
+                )
+            ) Color.Green.copy(alpha = 0.8f) else Color.Red.copy(alpha = 0.8f)
             CharWithLowerChar(x = "qd", i = "x")
-            getFormulaText(text = " := q⁴ - ")
-            CharWithLowerChar(x = "q", i = "4")
-            getFormulaText(text = " = ${getQuantileDifference(numbersList)}")
+            getFormulaText(text = " := ")
+            getFormulaText(text = " q⁴ - ", color = colorFor75)
+            CharWithLowerChar(x = "q", i = "4", color = colorFor25)
         }
+        if (isQuantileCalculable(numbersList, 0.75) && isQuantileCalculable(numbersList, 0.25)) {
+            Divider(modifier = Modifier.width(200.dp))
+            Spacer(modifier = Modifier.height(5.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                getFormulaText(
+                    text = "= ${
+                        getQuantile(
+                            numbersList,
+                            0.75
+                        )
+                    } - ${getQuantile(numbersList, 0.25)} = ${getQuantileDifference(numbersList)}"
+                )
+            }
+        }
+
+
+
         Divider(modifier = Modifier.padding(5.dp))
         // 9-Varianz
         getHeadline(text = "Varianz")
@@ -330,7 +362,7 @@ fun MainScreen(
             getFormulaText(text = "/", fontSize = 19, color = Color.White)
             getFormulaText(text = "(n-1)=")
         }
-        getFormulaText(text = "${getVariance(numbersList)}")
+        getFormulaText(text = "${getVariance(numbersList)}", color = Color.Green.copy(alpha = .8f))
         Divider(modifier = Modifier.padding(5.dp))
         // 10-Standardabweichung
         getHeadline(text = "Standardabweichung")
@@ -352,7 +384,7 @@ fun MainScreen(
             CharWithLowerChar(x = "-x", i = "(1)")
             getFormulaText(text = ") = ")
         }
-        getFormulaText(text = "${getWingSpan(numbersList)}")
+        getFormulaText(text = "${getWingSpan(numbersList)}", color = Color.Green.copy(alpha = .8f))
         Divider(modifier = Modifier.padding(5.dp))
         // 12-Variationskoeffizient (relative Standardabweichung)
         getHeadline(text = "Variationskoeffizient")
@@ -362,8 +394,8 @@ fun MainScreen(
             getFormulaText(text = " := ")
             CharWithLowerChar(x = "s", i = "x")
             getFormulaText(text = "/", color = Color.White)
-            getFormulaText(text = "x̄")
-            getFormulaText(text = " = ${getCoefficientOfVariation(numbersList)}")
+            getFormulaText(text = "x̄ = ")
+            getFormulaText(text = "${getCoefficientOfVariation(numbersList)}", color = Color.Green.copy(alpha = .8f))
         }
         Divider(modifier = Modifier.padding(5.dp))
         // 13-Schiefekoeffizient-1
@@ -388,7 +420,7 @@ fun MainScreen(
                 height = 21
             )
         }
-        getFormulaText(text = getSkewness1(numbersList))
+        getFormulaText(text = getSkewness1(numbersList), color = Color.Green.copy(alpha = .8f))
         Divider(modifier = Modifier.padding(2.dp))
 
 
@@ -404,7 +436,7 @@ fun MainScreen(
             getFormulaText(text = "/", fontSize = 23, color = Color.White)
             CharWithLowerChar(x = "s", i = "x")
         }
-        getFormulaText(text = getSkewness2(numbersList))
+        getFormulaText(text = getSkewness2(numbersList), color = Color.Green.copy(alpha = .8f))
         Divider(modifier = Modifier.padding(2.dp))
 
 
@@ -420,7 +452,7 @@ fun MainScreen(
             getFormulaText(text = "/", fontSize = 23, color = Color.White)
             CharWithLowerChar(x = "s", i = "x")
         }
-        getFormulaText(text = getSkewness1(numbersList))
+        getFormulaText(text = getSkewness1(numbersList), color = Color.Green.copy(alpha = .8f))
         Divider(modifier = Modifier.padding(5.dp))
     }
 }
